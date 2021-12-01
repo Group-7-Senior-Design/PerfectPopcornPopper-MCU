@@ -4,7 +4,7 @@
  */
 
 #include <arduinoFFT.h>
- 
+#include "pinDefine.h"
 #define SAMPLES 128  //SAMPLES-pt FFT. Must be a base 2 number.
 #define SAMPLING_FREQUENCY 20000 //Ts = Based on Nyquist, must be 2 times the highest expected frequency.
 #define LOW_CUTOFF_FREQUENCY SAMPLES/32
@@ -70,7 +70,7 @@ int8_t popLatch = 0;
 
 void setup() 
 {
-    pinMode(7,OUTPUT);
+    pinMode(SIGNALPIN,OUTPUT);
     // Fill Yavg with zero values
     for(int i = 0; i < YAvgLength; i++){
         Yavg[i] = 0;
@@ -86,9 +86,11 @@ void setup()
     sbi(ADCSRA,ADPS2) ;
     cbi(ADCSRA,ADPS1) ;
     sbi(ADCSRA,ADPS0) ;
-
-    Serial.begin(115200); //Baud rate for the Serial Monitor
-    //digitalWrite(7, HIGH);
+    if(SERIAL_CONNECTED == 1){
+      Serial.begin(115200); //Baud rate for the Serial Monitor
+    }
+   
+    digitalWrite(SIGNALPIN, HIGH);
 }
 
 
@@ -103,7 +105,7 @@ void loop()
         //Returns the number of microseconds since the Arduino board began running the current script.
         microSeconds = micros();     
      
-        vReal[i] = analogRead(A0); //Reads the value from analog pin 0 (A0), quantize it and save it as a real term.
+        vReal[i] = analogRead(ANALOGPIN); //Reads the value from analog pin 0 (A0), quantize it and save it as a real term.
         vImag[i] = 0; //Makes imaginary term 0 always
 
         /*remaining wait time between samples if necessary*/
@@ -157,13 +159,15 @@ void loop()
         if (maxY > amplitudeThreshold){
             popFound = 1;
               // turn the LED on (HIGH is the voltage level)
-            digitalWrite(7, HIGH); 
-            delay(50);
-            digitalWrite(7, LOW);   // turn the LED on (HIGH is the voltage level)
-            delay(50); 
-            digitalWrite(7, HIGH); 
-            Serial.print(maxY);
-            Serial.println("  popFound");     
+        
+            digitalWrite(SIGNALPIN, LOW);   // turn the LED on (HIGH is the voltage level)
+            delay(30); 
+            digitalWrite(SIGNALPIN, HIGH); 
+            if(SERIAL_CONNECTED == 1){
+              Serial.print(maxY);
+              Serial.println("  popFound");
+            }
+                 
         }
     }
 
@@ -194,9 +198,10 @@ void loop()
 //        }
 //    }
 
-
-    //prevPopFound = popFound
-    Serial.println(maxY);     //Print out the most dominant frequency.
+    if(SERIAL_CONNECTED == 1){
+              Serial.print(maxY);
+              Serial.println("  popFound");
+            }
      k = k +1;
      
     /*Script stops here. Hardware reset required.*/

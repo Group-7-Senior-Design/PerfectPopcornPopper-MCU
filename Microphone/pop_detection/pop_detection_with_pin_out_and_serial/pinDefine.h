@@ -1,0 +1,8 @@
+
+
+#define SERIAL_CONNECTED 1
+
+
+#define SIGNALPIN 7
+
+#define ANALOGPIN A0
