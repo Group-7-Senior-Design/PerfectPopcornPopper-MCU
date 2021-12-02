@@ -1,8 +1,8 @@
 
 
-#define SERIAL_CONNECTED 0
+#define SERIAL_CONNECTED 1
 
 
-#define SIGNALPIN A4
+#define SIGNALPIN 7//A4
 
-#define ANALOGPIN A2
+#define ANALOGPIN A0 //A2

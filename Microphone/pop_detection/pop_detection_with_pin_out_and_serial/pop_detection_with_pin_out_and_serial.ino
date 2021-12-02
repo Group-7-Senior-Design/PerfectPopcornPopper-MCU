@@ -86,11 +86,11 @@ void setup()
     sbi(ADCSRA,ADPS2) ;
     cbi(ADCSRA,ADPS1) ;
     sbi(ADCSRA,ADPS0) ;
+    
     if(SERIAL_CONNECTED == 1){
       Serial.begin(115200); //Baud rate for the Serial Monitor
     }
-   
-    digitalWrite(SIGNALPIN, HIGH);
+    digitalWrite(SIGNALPIN, LOW);
 }
 
 
@@ -159,13 +159,12 @@ void loop()
         if (maxY > amplitudeThreshold){
             popFound = 1;
               // turn the LED on (HIGH is the voltage level)
-        
-            digitalWrite(SIGNALPIN, LOW);   // turn the LED on (HIGH is the voltage level)
-            delay(30); 
             digitalWrite(SIGNALPIN, HIGH); 
+            delay(50);
+            digitalWrite(SIGNALPIN, LOW);   // turn the LED on (HIGH is the voltage level)
             if(SERIAL_CONNECTED == 1){
-              Serial.print(maxY);
-              Serial.println("  popFound");
+                Serial.print(maxY);
+                Serial.println("  popFound");
             }
                  
         }
@@ -198,10 +197,13 @@ void loop()
 //        }
 //    }
 
-    if(SERIAL_CONNECTED == 1){
-              Serial.print(maxY);
-              Serial.println("  popFound");
-            }
+
+    //prevPopFound = popFound
+
+     if(SERIAL_CONNECTED == 1){
+         Serial.println(maxY); 
+     }
+      
      k = k +1;
      
     /*Script stops here. Hardware reset required.*/
