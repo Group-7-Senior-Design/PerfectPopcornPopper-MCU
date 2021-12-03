@@ -17,9 +17,10 @@ unsigned int runs = 0; //number of times FSM started
 unsigned long milliSeconds = 0; //used to hold the current number of milliseconds
 unsigned long popDetectedAt = 0;// used to hold the number of milliseconds when the most recent pop was detected
 unsigned long threeMinutes = 180000;//the number of milliseconds in three minutes
-unsigned long threeMinutes = 60000;
+unsigned long oneMinute = 60000;
 unsigned long fifteenSeconds = 15000;
 unsigned long halfSecond = 500;
+unsigned long startTime= 0;
 unsigned int popCt = 0;
 
 
@@ -105,10 +106,10 @@ void loop() {
   //pop detection will set a timer between  
   
   milliSeconds = millis();
-  if(milliSeconds > (threeMinutes * runs)){
+  if(milliSeconds > (startTime + (threeMinutes * runs))){
     doneRoutine();
   }
-  if(milliSeconds > (oneMinutes * runs){
+  if(milliSeconds > (startTime + (oneMinute * runs))){
       if(milliSeconds > fifteenSeconds + popDetectedAt ){
           doneRoutine();
       }
@@ -123,9 +124,9 @@ void loop() {
 void startRoutine(){
   //reset variables
   popCt = 0;
-  popDetectedAt = millis();
   showWorking();
   runs = runs + 1;
+  startTime = millis();
 }
 //POP ROUTINE
 void popDetectedRoutine(){

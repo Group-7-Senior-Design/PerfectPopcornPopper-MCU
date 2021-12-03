@@ -45,12 +45,12 @@ double Yavg[YAvgLength];
 /* Tunable value used to evaluate if a pop is occuring by observing if this
  * percent of frequency bins exceed the running average
  */
-double popThreshold = .60;
+double popThreshold = .70;
 
 /* Tunable value used to evaluate if the amplitude increase is significant
  * enough to be considered a pop.
  */
-int amplitudeThreshold = 200;
+int amplitudeThreshold = 21;
 
 
 /* Variable k is used for Y average

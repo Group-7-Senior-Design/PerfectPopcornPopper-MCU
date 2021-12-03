@@ -1,24 +1,24 @@
 
-#include <Wire.h>
-#include <Adafruit_SSD1306.h>
-#include "config.h"
-//including basic arduino headers
 
+/** Define for a faster ADC
+ * cbi clears registor 
+ */
+#ifndef cbi
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#endif
 
-//Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
-Adafruit_SSD1306 dis = Adafruit_SSD1306(128, 64, &Wire, 0);
-// hardware SPI, using SCK/MOSI/MISO hardware SPI pins and then user selected CS/IRQ/RST 
-////service/char IDs
-//int32_t serviceID;
-//int32_t charID;
-int buzzer = 5;
+/** Define for a faster ADC
+ * sbi sets registor 
+ */
+#ifndef sbi
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#endif
 
 /***************************************************************************/
 /* START Detect Variables
 /***************************************************************************/
-unsigned long long samplingPeriod;
-unsigned long long microSeconds;
- 
+#define ANALOGPIN A2
+const int SAMPLES = 2;
 double amp [SAMPLES] = {}; 
 int initCt = 0;
 float initAverage = 0;
@@ -35,14 +35,10 @@ unsigned int sum = 0;
 /***************************************************************************/
 /* START Varius FSM and Timing Variables
 /***************************************************************************/
-unsigned int runs = 1; //number of times FSM started
-unsigned long startTime = 0;
-unsigned long milliSeconds = 0; //used to hold the current number of milliseconds
-unsigned long popDetectedAt = 0;// used to hold the number of milliseconds when the most recent pop was detected
-unsigned long threeMinutes = 180000;//the number of milliseconds in three minutes
 unsigned long fifteenSeconds = 15000;
-unsigned int popCt = 0;
-
+unsigned long startTime = 0;
+unsigned long popFoundAt = 0;
+int state = LOW;
 /***************************************************************************/
 /*  END Varius FSM and Timing Variables
 /***************************************************************************/
@@ -60,23 +56,14 @@ void setup(){
     cbi(ADCSRA,ADPS1) ;
     sbi(ADCSRA,ADPS0) ;
 
-    
+    pinMode(7, OUTPUT);
+    digitalWrite(7, state);
+    startTime = millis();
+    Serial.begin(115200); 
 }
 
 
 void loop(){
-
-    //DEBUG VIEW
-    dis.clearDisplay();   
-    dis.setCursor(0,2);   
-    dis.print(F("POP:"));
-    dis.println(popCt);
-    dis.print(F("AMP:"));
-    dis.println((int)currAverage);
-    dis.print(F("THRESH:"));
-    dis.println((int)thresh);
-    dis.display();
-    //end DEBUG VIEW
     
     sum = 0;
     for(int i=0; i<SAMPLES; i++){
@@ -97,43 +84,22 @@ void loop(){
     }
     //compute threshold
     thresh = initAverage + increase;
-
-    if(currAverage > (thresh)){
-        popCt = popCt + 1;
-         //wait to display next message
-        popDetectedAt = millis();
+    if(state == HIGH && (millis() > popFoundAt + 10)){
+      state = LOW;
+      digitalWrite(7, state);
     }
-
-
-    //TIMER CHECKS
-    milliSeconds = millis();
-
-    //IF THREE MINUTES END
-    if(milliSeconds > (startTime + (threeMinutes * runs))){
-        //RESET VARIABLES 
-        
-        total = 0;
-        initCt = 0;
-        popCt = 0;
-        //INCREMENT VARIABLES
-        runs ++;
-        startTime = millis();
-        //RESTART
-        loop();
+    if(currAverage > thresh){
+        state = HIGH;
+        digitalWrite(7, state);
+        popFoundAt = millis();
     }
-
-    //IF fifteen seconds since last pop END and popcorn has at least been cooking for 1 min
-    if(milliSeconds > ( startTime + (oneMinute * runs))){
-        if(milliSeconds > ( fifteenSeconds + popDetectedAt ){
-            total = 0;
-            initCt = 0;
-            popCt = 0;
-            //INCREMENT VARIABLES
-            runs ++;
-            startTime = millis();
-            //RESTART
-            loop();
-        }
+    if(state == HIGH){
+      Serial.print("POP FOUND");
     }
+    Serial.print("avg: ");
+    Serial.println(currAverage);
+    Serial.print("thresh: ");
+    Serial.println(thresh);
+
     
 }
