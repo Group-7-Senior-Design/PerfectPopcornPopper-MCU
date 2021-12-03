@@ -51,16 +51,16 @@ void setup()
 int count = 0;
 void loop() 
 {  
-  //check button one to send data
-  int sensorValue = analogRead(buttonOne);
-  float voltage= sensorValue * (5.0 / 1023.0);
-  if(voltage >= 4.5)
-  {    
+//  //check button one to send data
+//  int sensorValue = analogRead(buttonOne);
+//  float voltage= sensorValue * (5.0 / 1023.0);
+//  if(voltage >= 4.5)
+//  {    
     count = (count + 1) % 3;
     BLE_send(count);
     delay(1000);
-  }
-    
+//  }
+//    
 }
 
 
