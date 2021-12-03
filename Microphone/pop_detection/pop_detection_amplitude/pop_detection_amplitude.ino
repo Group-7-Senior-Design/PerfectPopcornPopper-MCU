@@ -49,25 +49,7 @@ unsigned int popCt = 0;
 void(* resetFunc)(void) = 0;
 
 void setup(){
-    //begin display usage
-    dis.begin(SSD1306_SWITCHCAPVCC, 0x3D);
-    dis.clearDisplay();
-    dis.setTextSize(2);         
-    dis.setTextColor(SSD1306_WHITE); 
-
-    //display successful display initialization
-    dis.clearDisplay();
-    milliSeconds = millis();
-    while(millis() < (milliSeconds + 2000)){
-     //do nothing 
-    }
-    dis.setCursor(0,2);   
-    dis.println(F("Display"));
-    dis.println(F("Initialized!!"));
-    dis.display();
-    //mark the time of display for timing
-    milliSeconds = millis();
-   
+ 
 
     // the adc prescale set to 32 allows for 28microsecond adc call
     // s2 ,s1 ,s0
@@ -78,23 +60,7 @@ void setup(){
     cbi(ADCSRA,ADPS1) ;
     sbi(ADCSRA,ADPS0) ;
 
-    //wait at least half second to display next message
-    while(millis() < (milliSeconds + 2000)){
-     //do nothing 
-    }
-    dis.clearDisplay();   
-    dis.setCursor(0,2);   
-    dis.println(F("ADC/Detect"));
-    dis.println(F("Initialized"));
-    dis.display();
-    milliSeconds = millis();
-
-     //wait to display next message
-    while(millis() < (milliSeconds + 2000)){
-     //do nothing 
-    }
-
-    startTime = millis();
+    
 }
 
 
@@ -136,11 +102,6 @@ void loop(){
         popCt = popCt + 1;
          //wait to display next message
         popDetectedAt = millis();
-        dis.clearDisplay();   
-        dis.setCursor(0,2);   
-        dis.print(F("POP"));
-        dis.println(popCt);
-        dis.display();
     }
 
 
@@ -149,12 +110,6 @@ void loop(){
 
     //IF THREE MINUTES END
     if(milliSeconds > (startTime + (threeMinutes * runs))){
-              //First update Display as it is the primary use of communication
-        dis.clearDisplay();   
-        dis.setCursor(0,2);   
-        dis.println(F("Done!"));
-        dis.display();
-    
         //RESET VARIABLES 
         
         total = 0;
@@ -168,8 +123,17 @@ void loop(){
     }
 
     //IF fifteen seconds since last pop END and popcorn has at least been cooking for 1 min
-    if(milliSeconds > ( fifteenSeconds + popDetectedAt ){
-//      doneRoutine();
+    if(milliSeconds > ( startTime + (oneMinute * runs))){
+        if(milliSeconds > ( fifteenSeconds + popDetectedAt ){
+            total = 0;
+            initCt = 0;
+            popCt = 0;
+            //INCREMENT VARIABLES
+            runs ++;
+            startTime = millis();
+            //RESTART
+            loop();
+        }
     }
     
 }

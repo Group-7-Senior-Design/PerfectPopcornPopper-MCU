@@ -17,6 +17,7 @@ unsigned int runs = 0; //number of times FSM started
 unsigned long milliSeconds = 0; //used to hold the current number of milliseconds
 unsigned long popDetectedAt = 0;// used to hold the number of milliseconds when the most recent pop was detected
 unsigned long threeMinutes = 180000;//the number of milliseconds in three minutes
+unsigned long threeMinutes = 60000;
 unsigned long fifteenSeconds = 15000;
 unsigned long halfSecond = 500;
 unsigned int popCt = 0;
@@ -27,7 +28,7 @@ unsigned int popCt = 0;
 /* 
 /***************************************************************************/
 // hardware SPI, using SCK/MOSI/MISO hardware SPI pins and then user selected CS/IRQ/RST 
-Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
+//Adafruit_BluefruitLE_SPI ble(BLUEFRUIT_SPI_CS, BLUEFRUIT_SPI_IRQ, BLUEFRUIT_SPI_RST);
 //service/char IDs
 int32_t serviceID;
 int32_t charID;
@@ -65,7 +66,7 @@ void setup() {
   //bluetooth initilization should utilize the display
   //No matter what after X attempts to connect move past because 
   //popcorn should be starting to pop
-  bleSetup();
+//  bleSetup();
   showString("BLE Set Up Done");
   delay(1000);
   
@@ -74,7 +75,6 @@ void setup() {
   //tones should be varying and cover a wide part of the frequency spectrum
  
   startRoutine();
-  popDetectedAt = millis();
 }
 // SETUP END ***********************************************************************************
 
@@ -108,9 +108,13 @@ void loop() {
   if(milliSeconds > (threeMinutes * runs)){
     doneRoutine();
   }
-  if(milliSeconds > fifteenSeconds + popDetectedAt ){
-    doneRoutine();
+  if(milliSeconds > (oneMinutes * runs){
+      if(milliSeconds > fifteenSeconds + popDetectedAt ){
+          doneRoutine();
+      }
   }
+ 
+  
   
 }
 // LOOP END ***********************************************************************************
@@ -131,10 +135,10 @@ void popDetectedRoutine(){
   showValue(popCt);
   showValue2(popDetectedAt);
   //update phone for user
-  ble.print( F("AT+GATTCHAR=") );
-  ble.print( charID );
-  ble.print( F(",") );
-  ble.println("AAAA");
+//  ble.print( F("AT+GATTCHAR=") );
+//  ble.print( charID );
+//  ble.print( F(",") );
+//  ble.println("AAAA");
 }
 //FINISH ROUTINE
 void doneRoutine(){
@@ -142,10 +146,10 @@ void doneRoutine(){
   showDone();
   //Second update phone by bluetooth
   //prepare the buffer and instruction for sending data
-  ble.print( F("AT+GATTCHAR=") );
-  ble.print( charID );
-  ble.print( F(",") );
-  ble.println("CCCC");
+//  ble.print( F("AT+GATTCHAR=") );
+//  ble.print( charID );
+//  ble.print( F(",") );
+//  ble.println("CCCC");
   
   tune();
   
@@ -215,81 +219,81 @@ void tune(){
 
 // START BLE CODE *****************************************************************************
 //Setup the Hardware and BLE stuff
-void bleSetup() 
-{  
-  bool init = BLE_initialize();    
-}
-
-//Setup the Hardware and BLE stuff
-bool BLE_initialize(void) 
-{  
-  //check if connected to the BLE module - and pass in the debug variable
-  if(!ble.begin(VERBOSE_MODE))
-  {
-     //if cannot connect to ble module, no point in continuing as it will not work
-     //this is typically due to a mistake in hardware such as wiring
-     return false;
-  }
-
-  //factory reset to kill any previous data stashed within the device 
-  if(FACTORYRESET_ENABLE)
-  {      
-    //if cannot factory reset - issue msg to screen and halt execution with empty while loop 
-    if(!ble.factoryReset())
-    {
-      return false;
-    }
-  }
-
-  //change the name of the BLE device    
-  if (! ble.sendCommandCheckOK(F("AT+GAPDEVNAME=Perfect Popcorn Popper")) ) {
-    return false;
-  }
-
-  //estabalish the GATT Service and GATT characteristics
-  boolean success;
-
-  //if flag set to true, first clear all pre-existing gatt services and characteristics
-  if(GATT_CLEAR_ALL)
-  {
-    success = ble.sendCommandCheckOK(F("AT+GATTCLEAR"));
-    if(!success) 
-    {
-      //could not clear old GATT services
-      return false;
-    }
-  }
-  //establish service
-  success = ble.sendCommandWithIntReply(F("AT+GATTADDSERVICE=UUID128=00-11-00-11-44-55-66-77-88-99-AA-BB-CC-DD-EE-FF"), &serviceID);
-  if(!success) 
-  {
-    //could not establish main service, no comms may be completed
-    return false;
-  }
-  //establish characteristic that is attached to the service just established
-  success = ble.sendCommandWithIntReply(F("AT+GATTADDCHAR=UUID=0x0002, PROPERTIES=0x12, MIN_LEN=1, MAX_LEN=20, VALUE=5"), &charID);
-  if(!success)
-  {
-    //could not establish main characteristic under the service, no comms may be completed
-     return false;
-  }
-  //issue ble reset to solidify changes made to the GATT services and characteristics
-  ble.reset();
-
-  if(WAIT_FOR_CONN)
-  {
-    //wait for an incoming connection  
-    while(!ble.isConnected())
-    {
-      //wait for a connection
-    }
-  }
-  
-   //setup completed - wait a second
-   showConnected();
-   delay(1000);
-   return true;
-}
+//void bleSetup() 
+//{  
+//  bool init = BLE_initialize();    
+//}
+//
+////Setup the Hardware and BLE stuff
+//bool BLE_initialize(void) 
+//{  
+//  //check if connected to the BLE module - and pass in the debug variable
+//  if(!ble.begin(VERBOSE_MODE))
+//  {
+//     //if cannot connect to ble module, no point in continuing as it will not work
+//     //this is typically due to a mistake in hardware such as wiring
+//     return false;
+//  }
+//
+//  //factory reset to kill any previous data stashed within the device 
+//  if(FACTORYRESET_ENABLE)
+//  {      
+//    //if cannot factory reset - issue msg to screen and halt execution with empty while loop 
+//    if(!ble.factoryReset())
+//    {
+//      return false;
+//    }
+//  }
+//
+//  //change the name of the BLE device    
+//  if (! ble.sendCommandCheckOK(F("AT+GAPDEVNAME=Perfect Popcorn Popper")) ) {
+//    return false;
+//  }
+//
+//  //estabalish the GATT Service and GATT characteristics
+//  boolean success;
+//
+//  //if flag set to true, first clear all pre-existing gatt services and characteristics
+//  if(GATT_CLEAR_ALL)
+//  {
+//    success = ble.sendCommandCheckOK(F("AT+GATTCLEAR"));
+//    if(!success) 
+//    {
+//      //could not clear old GATT services
+//      return false;
+//    }
+//  }
+//  //establish service
+//  success = ble.sendCommandWithIntReply(F("AT+GATTADDSERVICE=UUID128=00-11-00-11-44-55-66-77-88-99-AA-BB-CC-DD-EE-FF"), &serviceID);
+//  if(!success) 
+//  {
+//    //could not establish main service, no comms may be completed
+//    return false;
+//  }
+//  //establish characteristic that is attached to the service just established
+//  success = ble.sendCommandWithIntReply(F("AT+GATTADDCHAR=UUID=0x0002, PROPERTIES=0x12, MIN_LEN=1, MAX_LEN=20, VALUE=5"), &charID);
+//  if(!success)
+//  {
+//    //could not establish main characteristic under the service, no comms may be completed
+//     return false;
+//  }
+//  //issue ble reset to solidify changes made to the GATT services and characteristics
+//  ble.reset();
+//
+//  if(WAIT_FOR_CONN)
+//  {
+//    //wait for an incoming connection  
+//    while(!ble.isConnected())
+//    {
+//      //wait for a connection
+//    }
+//  }
+//  
+//   //setup completed - wait a second
+//   showConnected();
+//   delay(1000);
+//   return true;
+//}
 // END BLE CODE *******************************************************************
 
 /***************************************************************************/
