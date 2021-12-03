@@ -6,7 +6,7 @@
 #include <Adafruit_GFX.h>
 #include <Wire.h>
 //declare and initialize library
-Adafruit_SSD1306 display(128, 64, &Wire, 0);
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
 /*
  * 
  * clear the current display

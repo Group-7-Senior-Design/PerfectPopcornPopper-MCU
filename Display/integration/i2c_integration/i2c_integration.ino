@@ -3,7 +3,7 @@
 #include <Adafruit_SSD1306.h>
 
 //declare and initialize library
-Adafruit_SSD1306 dis = Adafruit_SSD1306(128, 64, &Wire, 0);
+Adafruit_SSD1306 dis = Adafruit_SSD1306(128, 64, &Wire, -1);
 
 
 /*

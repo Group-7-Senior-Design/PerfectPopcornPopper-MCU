@@ -35,7 +35,7 @@ int32_t serviceID;
 int32_t charID;
 
 //declare and initialize library
-Adafruit_SSD1306 display(128, 64, &Wire, 0);
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
 int detectPin = 2;//pins 2/PD0 and 3/PD1 
 
