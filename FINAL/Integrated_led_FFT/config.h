@@ -47,8 +47,8 @@
  
 /*START DISPLAY VARIABLES ////////////////////////////////////////////
  */
- #define ALMOSTPIN 23
- #define POPPIN A4
+ #define ALMOSTPIN A4
+ #define POPPIN 24
  #define DONEPIN A5
 
 /*END DISPLAY VARIABLES ////////////////////////////////////////////
@@ -67,8 +67,8 @@
 #define DETECTPIN A2
 #define SAMPLES 128  //SAMPLES-pt FFT. Must be a base 2 number.
 #define SAMPLING_FREQUENCY 20000 //Ts = Based on Nyquist, must be 2 times the highest expected frequency.
-#define LOW_CUTOFF_FREQUENCY SAMPLES/32
-#define HIGH_CUTOFF_FREQUENCY SAMPLES/4
+#define LOW_CUTOFF_FREQUENCY 4
+#define HIGH_CUTOFF_FREQUENCY 48
 
 /** Define for a faster ADC
  * cbi clears registor 

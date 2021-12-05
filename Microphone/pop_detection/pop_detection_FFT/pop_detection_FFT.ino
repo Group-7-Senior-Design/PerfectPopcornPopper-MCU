@@ -122,13 +122,13 @@ void loop()
       for(int i=0; i<SAMPLES; i++)
       {
           //Returns the number of microseconds since the Arduino board began running the current script.
-//          microSeconds = micros();     
+          microSeconds = micros();     
        
           vReal[i] = analogRead(ANALOGPIN); //Reads the value from analog pin 0 (A0), quantize it and save it as a real term.
           vImag[i] = 0; //Makes imaginary term 0 always
   
           /*remaining wait time between samples if necessary*/
-          while(micros() < (microSeconds + 26))
+          while(micros() < (microSeconds + 25))
           {
             //do nothing
           }

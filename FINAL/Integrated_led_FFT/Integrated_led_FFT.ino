@@ -21,7 +21,7 @@ double vReal[SAMPLES]; //create vector of size SAMPLES to hold real values
 double vImag[SAMPLES]; //create vector of size SAMPLES to hold imaginary values
 
 /* Initialize running average for the region being analyzed to make a
- * threshold to compare current frame against. My use of y and Y is distinct
+ * Threshhold to compare current frame against. My use of y and Y is distinct
  * in var names -- y is time domain and Y is frequency domain
  */
 const int YAvgLength = HIGH_CUTOFF_FREQUENCY - LOW_CUTOFF_FREQUENCY + 1;
@@ -31,12 +31,12 @@ double Yavg[YAvgLength];
 /* Tunable value used to evaluate if a pop is occuring by observing if this
  * percent of frequency bins exceed the running average
  */
-double popThreshold = .7;//.72;
+double popThreshhold = 0.69;
 
 /* Tunable value used to evaluate if the amplitude increase is significant
  * enough to be considered a pop.
  */
-int amplitudeThreshold = 400;//400;
+int amplitudeThreshhold = 7500;//400;
 
 
 /* Variable k is used for Y average
@@ -53,6 +53,17 @@ unsigned short int popCount = 0;
 bool popFound = 0;
 bool prevPopFound = 0;
 int8_t popLatch = 0;
+
+
+//TUNABLES
+unsigned long long latchTime = 300;
+double popThreshStart = 1.0;
+int ampThreshStart = 13000;
+double popThreshEnd = .73;
+double popThreshMid = .65;
+int ampThreshMid = 7000;
+unsigned long long fs = 40000;
+unsigned long long ts = 1000000/fs;
 
 
 /***************************************************************************/
@@ -76,13 +87,14 @@ unsigned long temp = 0; //used for calculations out side of if statement
 
 //quick values to use
 unsigned long popLedDuration = 100;
-unsigned long maxTime = 180000;//the number of milliseconds in three minutes
-unsigned long minTime = 160000;//this a minute and a half
+unsigned long maxTime = 160000;//the number of milliseconds in three minutes
+unsigned long minTime = 120000;//this a 2 min 40
 unsigned long fifteenSeconds = 15000;
 unsigned long halfSecond = 500;
-unsigned long timeAfterPopDone = fifteenSeconds;
-unsigned long timeAfterPopAlmost = 5000;//fiveseconds
+unsigned long timeAfterPopDone = fifteenSeconds/3;
+unsigned long timeAfterPopAlmost = 1000;
 
+unsigned long long popDetectedAtLatch = 0;
 
 
 /***************************************************************************/
@@ -137,31 +149,31 @@ void loop() {
   detectLoop();
 
 
-//  //turn off leds if they're on after a bit of time
-//  //this is used instead of delay() because we don't want the algorithm to stop pulling values
-//  milliSeconds = millis();
-//  temp = popLedOnAt + popLedDuration;
-//  if( milliSeconds > temp ){
-//    clearPop();
-//  }
-//  
-//  //Loop over pop detection
-//  
-//  milliSeconds = millis();
-//  temp = startTime + maxTime;
-//  if(milliSeconds > temp){
-//    doneRoutine();
-//  }
-//  temp = startTime + minTime;
-//  if(milliSeconds > temp){
-//      if(milliSeconds > (timeAfterPopDone + popDetectedAt) ){
-//          doneRoutine();
-//      }
-//      if(milliSeconds > (timeAfterPopAlmost + popDetectedAt)){
-//        almostDoneRoutine();
-//      }
-//  }
-//  
+  //turn off leds if they're on after a bit of time
+  //this is used instead of delay() because we don't want the algorithm to stop pulling values
+  milliSeconds = millis();
+  temp = popLedOnAt + popLedDuration;
+  if( milliSeconds > temp ){
+    clearPop();
+  }
+  
+  //Loop over pop detection
+  
+  milliSeconds = millis();
+  temp = startTime + maxTime;
+  if(milliSeconds > temp){
+    doneRoutine();
+  }
+  temp = startTime + minTime;
+  if(milliSeconds > temp){
+      if(milliSeconds > (timeAfterPopDone + popDetectedAt) ){
+          doneRoutine();
+      }
+      if(milliSeconds > (timeAfterPopAlmost + popDetectedAt)){
+        almostDoneRoutine();
+      }
+  }
+  
   
 }
 // LOOP END ***********************************************************************************
@@ -176,6 +188,8 @@ void startRoutine(){
   startTime = millis();
   
 }
+
+
 //POP ROUTINE
 void popDetectedRoutine(){
   popDetectedAt = millis();
@@ -240,77 +254,94 @@ void detectSetUp(){
         Yavg[i] = 0;
     }
 
-    //Period in microseconds     
-    samplingPeriod = round(1000000*(1.0/SAMPLING_FREQUENCY)); 
-
     // the adc prescale set to 32 allows for 28microsecond adc call
     // s2 ,s1 ,s0
     // 1  ,0  ,1 => 32 prescalar
     // 1  ,0  ,0 => 16 prescalar
     sbi(ADCSRA,ADPS2) ;
     cbi(ADCSRA,ADPS1) ;
-    sbi(ADCSRA,ADPS0) ;
+    cbi(ADCSRA,ADPS0) ;
     
 }
 
 
 void detectLoop(){
-    /*Sample SAMPLES times*/
-    for(int i=0; i<SAMPLES; i++)
-    {
-        //Returns the number of microseconds since the Arduino board began running the current script.
-        microSeconds = micros();     
-     
-        vReal[i] = analogRead(DETECTPIN); //Reads the value from analog pin 0 (A0), quantize it and save it as a real term.
-        vImag[i] = 0; //Makes imaginary term 0 always
-
-        /*remaining wait time between samples if necessary*/
-        while(micros() < (microSeconds + samplingPeriod))
-        {
-          //do nothing
-        }
-    }
+ 
+  if(micros() > (popDetectedAtLatch + latchTime)){
     
-    /*Perform FFT on samples*/
-    FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
-    FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
-
-    //vReal now holds all the magnitudes
-    FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
-    
-    int freqBinCT = 0;//track number of high frequency bins
-    int maxY = 0;//track biggiest peak
-    for(int j = LOW_CUTOFF_FREQUENCY; j < HIGH_CUTOFF_FREQUENCY; j ++)
-    {
-        //used to incrementing Yavg array
-        int j2 = j - LOW_CUTOFF_FREQUENCY;
-
-        // add to bin count
-        if( Yavg[j2] < vReal[j])
-        {
-            freqBinCT = freqBinCT + 1;
-                if(maxY < vReal[j]){
-                    maxY = vReal[j];
-                }
-        }
-
-        // add to moving average on bin at a time
-        Yavg[j2] = (Yavg[j2] * (k -1) / k ) + ( vReal[j] / k );
-    }
-
-    /**
-     * note if pop detected in frame based on whether a wide-band volume
-     * increase is observed, and whether the amplitude was significantly
-     * increased (significance set by the tunable threshold)
-     */
-    if (freqBinCT > popThreshold * YAvgLength){
-        if (maxY > amplitudeThreshold){
-            popDetectedRoutine();
-                 
-        }
-    }
+      /*Sample SAMPLES times*/
+      for(int i=0; i<SAMPLES; i++)
+      {
+          //Returns the number of microseconds since the Arduino board began running the current script.
+          microSeconds = micros();     
+       
+          vReal[i] = analogRead(DETECTPIN); //Reads the value from analog pin 0 (A0), quantize it and save it as a real term.
+          vImag[i] = 0; //Makes imaginary term 0 always
+  
+          /*remaining wait time between samples if necessary*/
+          while(micros() < (microSeconds + ts))
+          {
+            //do nothing
+          }
+      }
       
-     k = k +1;
+      /*Perform FFT on samples*/
+      FFT.Windowing(vReal, SAMPLES, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+      FFT.Compute(vReal, vImag, SAMPLES, FFT_FORWARD);
+  
+      //vReal now holds all the magnitudes
+      FFT.ComplexToMagnitude(vReal, vImag, SAMPLES);
+      
+      int freqBinCT = 0;//track number of high frequency bins
+      int maxY = 0;//track biggiest peak
+      for(int j = LOW_CUTOFF_FREQUENCY; j < HIGH_CUTOFF_FREQUENCY; j ++){
+          //used to incrementing Yavg array
+          int j2 = j - LOW_CUTOFF_FREQUENCY;
+  
+          // Find the max value for each sample set
+          // add to bin count
+          if( Yavg[j2] < vReal[j]){
+              freqBinCT = freqBinCT + 1;
+              if(maxY < vReal[j]){
+                 maxY = vReal[j];
+              }
+          }
+          
+          // add to moving average on bin at a time
+          Yavg[j2] = (Yavg[j2] * (k -1) / k ) + ( vReal[j] / k );
+      }
+
+      if(millis() < startTime +  40000){
+          popThreshhold = popThreshStart;//1.0;
+          amplitudeThreshhold = ampThreshStart;//13000;
+      }else if(millis() > startTime + 135000 ){
+          popThreshhold = popThreshEnd;//.73;
+          //amplitudeThreshhold = 7000;
+      }else{
+          popThreshhold = popThreshMid;//.65;
+          amplitudeThreshhold = ampThreshMid;//7000;
+      }
+      
+      /**
+       * note if pop detected in frame based on whether a wide-band volume
+       * increase is observed
+       * 
+       * , and whether the amplitude was significantly
+       * increased (significance set by the tunable Threshhold)
+       */
+      long binThresh = popThreshhold * YAvgLength;
+      if (freqBinCT > binThresh){
+          if (maxY > amplitudeThreshhold){
+              popDetectedAtLatch = micros();
+             
+              popCt ++;
+              popDetectedRoutine();
+             
+                   
+          }
+      }
+       k = k +1;
+    }
 }
 /***************************************************************************/
 /*   END     FAKE_POP CODE          */
