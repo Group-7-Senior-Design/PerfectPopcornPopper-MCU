@@ -3,7 +3,7 @@
 
 
 
-#define SERIAL_CONNECTED 0
+#define SERIAL_CONNECTED 1
 
 
 #define SIGNALPIN A4 //7

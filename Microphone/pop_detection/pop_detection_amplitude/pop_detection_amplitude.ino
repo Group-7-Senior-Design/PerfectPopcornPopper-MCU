@@ -23,7 +23,7 @@ double amp [SAMPLES] = {};
 int initCt = 0;
 float initAverage = 0;
 float thresh = 0;
-float increase = 10;
+float increase = 90;
 unsigned long total = 0;
 float currAverage = 0;
 unsigned int sum = 0;
@@ -35,9 +35,10 @@ unsigned int sum = 0;
 /***************************************************************************/
 /* START Varius FSM and Timing Variables
 /***************************************************************************/
-unsigned long fifteenSeconds = 15000;
+unsigned long popCt = 0;
+unsigned long fifteenSeconds = 3000;
 unsigned long startTime = 0;
-unsigned long popFoundAt = 0;
+unsigned long popDetectedAt = 0;
 int state = LOW;
 /***************************************************************************/
 /*  END Varius FSM and Timing Variables
@@ -70,7 +71,10 @@ void loop(){
         amp[i] = analogRead(ANALOGPIN); //Reads the value from analog pin 0 (A0), quantize it and save it
         sum += amp[i];
     }
-    if( millis() < (startTime + fifteenSeconds) ){
+    if(millis() < (startTime + fifteenSeconds)){
+      flagTotal = 0;
+    }
+    if(flagTotal){
         total += (float)sum / SAMPLES;
         initCt ++;
     }else{
@@ -84,22 +88,24 @@ void loop(){
     }
     //compute threshold
     thresh = initAverage + increase;
-    if(state == HIGH && (millis() > popFoundAt + 10)){
+    if(state == HIGH && (millis() > popDetectedAt + 10)){
       state = LOW;
       digitalWrite(7, state);
     }
-    if(currAverage > thresh){
+    if(currAverage > thresh && millis() > popDetectedAt + 300){
         state = HIGH;
         digitalWrite(7, state);
-        popFoundAt = millis();
+        popDetectedAt = millis();
+        Serial.print("POP FOUND");
+        Serial.print("AT LEVEL: ");
+        Serial.println(currAverage);
+        popCt++;
     }
-    if(state == HIGH){
-      Serial.print("POP FOUND");
-    }
-    Serial.print("avg: ");
+    
+    Serial.print("AT LEVEL: ");
     Serial.println(currAverage);
     Serial.print("thresh: ");
     Serial.println(thresh);
-
+    Serial.println(popCt);
     
 }

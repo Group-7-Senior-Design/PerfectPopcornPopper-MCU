@@ -1,21 +1,36 @@
-#include <arduinoFFT.h>
+
+
+
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
-#include "config.h"
 
 Adafruit_SSD1306 dis = Adafruit_SSD1306(128, 64, &Wire, 0);
 
 
+/** Define for a faster ADC
+ * cbi clears registor 
+ */
+#ifndef cbi
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#endif
+
+/** Define for a faster ADC
+ * sbi sets registor 
+ */
+#ifndef sbi
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#endif
 /***************************************************************************/
 /* START Detect Variables
 /***************************************************************************/
-unsigned long long samplingPeriod;
-unsigned long long microSeconds;
- 
+const int SAMPLES = 2;
 double amp [SAMPLES] = {}; 
-
-float init_average = 0;
-float curr_average = 0;
+int initCt = 0;
+float initAverage = 0;
+float thresh = 0;
+float increase = 1;
+unsigned long total = 0;
+float currAverage = 0;
 unsigned int sum = 0;
 /***************************************************************************/
 /* END Detect Variables
@@ -94,15 +109,15 @@ void loop(){
     sum = 0;
     for(int i=0; i<SAMPLES; i++){   
      
-        amp[i] = analogRead(ANALOGPIN); //Reads the value from analog pin 0 (A0), quantize it and save it
+        amp[i] = analogRead(A2); //Reads the value from analog pin 0 (A0), quantize it and save it
         sum += amp[i];
     }
  
-    average = (float)sum / SAMPLES;
+    currAverage = (float)sum / SAMPLES;
     dis.clearDisplay();   
     dis.setCursor(0,2);   
     dis.println(F("Amp:"));
-    dis.println(average);
+    dis.println(currAverage);
     dis.display();
 
 }
