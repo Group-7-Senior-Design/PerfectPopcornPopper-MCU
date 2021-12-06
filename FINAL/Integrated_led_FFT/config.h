@@ -47,9 +47,9 @@
  
 /*START DISPLAY VARIABLES ////////////////////////////////////////////
  */
- #define ALMOSTPIN A4
- #define POPPIN 24
- #define DONEPIN A5
+ #define ALMOSTPIN A5
+ #define POPPIN A4
+ #define DONEPIN 24
 
 /*END DISPLAY VARIABLES ////////////////////////////////////////////
  */
