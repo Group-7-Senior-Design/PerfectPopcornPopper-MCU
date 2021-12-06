@@ -56,12 +56,13 @@ int8_t popLatch = 0;
 
 
 //TUNABLES
-unsigned long long latchTime = 300;
-double popThreshStart = 1.0;
-int ampThreshStart = 13000;
-double popThreshEnd = .73;
-double popThreshMid = .65;
-int ampThreshMid = 7000;
+unsigned long long latchTime = 100;
+double popThreshStart = 1.10;
+int ampThreshStart = 20000;
+double popThreshEnd = .62;
+double popThreshMid = .62;
+int ampThreshMid = 45;
+int ampThreshEnd = 55;
 unsigned long long fs = 40000;
 unsigned long long ts = 1000000/fs;
 
@@ -87,11 +88,11 @@ unsigned long temp = 0; //used for calculations out side of if statement
 
 //quick values to use
 unsigned long popLedDuration = 100;
-unsigned long maxTime = 160000;//the number of milliseconds in three minutes
+unsigned long maxTime = 190000;//the number of milliseconds in three minutes
 unsigned long minTime = 120000;//this a 2 min 40
 unsigned long fifteenSeconds = 15000;
 unsigned long halfSecond = 500;
-unsigned long timeAfterPopDone = fifteenSeconds/3;
+unsigned long timeAfterPopDone = 4000;
 unsigned long timeAfterPopAlmost = 1000;
 
 unsigned long long popDetectedAtLatch = 0;
@@ -121,7 +122,7 @@ int32_t charID;
 // SETUP START ***********************************************************************************
 void setup() {
   //delay needed because the MCU does not restart the sketch without reprogramming unless this is here
-  delay(500);
+  delay(750);
   //Initialize the Screen First
   //Screen is first incase we need to display errors in other initilizing steps
   displaySetUp();
@@ -311,12 +312,13 @@ void detectLoop(){
           Yavg[j2] = (Yavg[j2] * (k -1) / k ) + ( vReal[j] / k );
       }
 
-      if(millis() < startTime +  40000){
+      if(millis() < startTime +  50000){
           popThreshhold = popThreshStart;//1.0;
           amplitudeThreshhold = ampThreshStart;//13000;
       }else if(millis() > startTime + 135000 ){
           popThreshhold = popThreshEnd;//.73;
-          //amplitudeThreshhold = 7000;
+          amplitudeThreshhold = ampThreshEnd;
+          latchTime = 500;
       }else{
           popThreshhold = popThreshMid;//.65;
           amplitudeThreshhold = ampThreshMid;//7000;
