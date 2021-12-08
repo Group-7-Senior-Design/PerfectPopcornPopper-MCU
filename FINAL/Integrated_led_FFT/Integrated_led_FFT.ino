@@ -170,7 +170,7 @@ void loop() {
       if(milliSeconds > (timeAfterPopDone + popDetectedAt) ){
           doneRoutine();
       }
-      if(milliSeconds > (timeAfterPopAlmost + popDetectedAt)){
+      else if(milliSeconds > (timeAfterPopAlmost + popDetectedAt)){
         almostDoneRoutine();
       }
   }
