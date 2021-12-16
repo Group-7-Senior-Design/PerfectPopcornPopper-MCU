@@ -67,7 +67,7 @@
 #define DETECTPIN A2
 #define SAMPLES 128  //SAMPLES-pt FFT. Must be a base 2 number.
 #define SAMPLING_FREQUENCY 20000 //Ts = Based on Nyquist, must be 2 times the highest expected frequency.
-#define LOW_CUTOFF_FREQUENCY 4
+#define LOW_CUTOFF_FREQUENCY 8
 #define HIGH_CUTOFF_FREQUENCY 48
 
 /** Define for a faster ADC

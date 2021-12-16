@@ -61,8 +61,8 @@ double popThreshStart = 1.10;
 int ampThreshStart = 20000;
 double popThreshEnd = .62;
 double popThreshMid = .62;
-int ampThreshMid = 45;
-int ampThreshEnd = 55;
+int ampThreshMid = 20;
+int ampThreshEnd = 20;
 unsigned long long fs = 40000;
 unsigned long long ts = 1000000/fs;
 
@@ -88,12 +88,12 @@ unsigned long temp = 0; //used for calculations out side of if statement
 
 //quick values to use
 unsigned long popLedDuration = 100;
-unsigned long maxTime = 190000;//the number of milliseconds in three minutes
-unsigned long minTime = 120000;//this a 2 min 40
+unsigned long maxTime = 210000;//the number of milliseconds in 3:30
+unsigned long minTime = 155000;//this 2 min 35
 unsigned long fifteenSeconds = 15000;
 unsigned long halfSecond = 500;
 unsigned long timeAfterPopDone = 4000;
-unsigned long timeAfterPopAlmost = 1000;
+unsigned long timeAfterPopAlmost = 700;
 
 unsigned long long popDetectedAtLatch = 0;
 
@@ -161,12 +161,10 @@ void loop() {
   //Loop over pop detection
   
   milliSeconds = millis();
-  temp = startTime + maxTime;
-  if(milliSeconds > temp){
+  if(milliSeconds > (startTime+maxTime)){
     doneRoutine();
   }
-  temp = startTime + minTime;
-  if(milliSeconds > temp){
+  else if(milliSeconds > (startTime+minTime)){
       if(milliSeconds > (timeAfterPopDone + popDetectedAt) ){
           doneRoutine();
       }
@@ -234,9 +232,34 @@ void doneRoutine(){
     ble.print( charID );
     ble.print( F(",") );
     ble.println("CCCC");
+    //prepare the buffer and instruction for sending data
+    ble.print( F("AT+GATTCHAR=") );
+    ble.print( charID );
+    ble.print( F(",") );
+    ble.println("CCCC");
+    //prepare the buffer and instruction for sending data
+    ble.print( F("AT+GATTCHAR=") );
+    ble.print( charID );
+    ble.print( F(",") );
+    ble.println("CCCC");
   
     
     tune();
+    //prepare the buffer and instruction for sending data
+    ble.print( F("AT+GATTCHAR=") );
+    ble.print( charID );
+    ble.print( F(",") );
+    ble.println("CCCC");
+    //prepare the buffer and instruction for sending data
+    ble.print( F("AT+GATTCHAR=") );
+    ble.print( charID );
+    ble.print( F(",") );
+    ble.println("CCCC");
+    //prepare the buffer and instruction for sending data
+    ble.print( F("AT+GATTCHAR=") );
+    ble.print( charID );
+    ble.print( F(",") );
+    ble.println("CCCC");
     while( millis() > milliSeconds + fifteenSeconds){
       
     }
